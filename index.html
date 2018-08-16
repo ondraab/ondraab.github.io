@@ -1,1 +1,58 @@
-Hello World
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Ramachandran component</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="custom-elements.min.js"></script>
+  <script src="ramachandran-component.js"></script>
+
+  <script>
+    var renderRamachandran = function (id, chains) {
+      var comp = document.createElement('ramachandran-component');
+      comp.setAttribute('pdb-ids', id)
+      comp.setAttribute('chains-to-show', chains);
+      comp.setAttribute('width', 600);
+      comp.setAttribute('models-to-show', '["1"]');
+      document.getElementById('rm').appendChild(comp);
+    };
+
+    (function () {
+      'use strict';
+      $(document).ready(function ($http) {
+        var tokens = window.location.href.split('/').reverse();
+        var pdbs = tokens[0].split(':')
+        pdbs[0] = pdbs[0].substring(1);
+        var pdbid = tokens[0] == "" ? '1tqn' : tokens[0].substring(1);
+
+        pdbid = pdbs[0];
+        var chains = '["A"]';
+        var pdbIds = '["' + pdbs.join('","') + '"]'
+
+        $.getJSON("https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/" + pdbid, function (data) {
+          var c = []
+          data[pdbid].forEach(e => {
+            e['in_chains'].forEach(x => {
+              c.push(x)
+            })
+          });
+          var sorted = Array.from(new Set(c)).sort()
+          var chains = '["' + sorted.join('","') + '"]'
+          
+          renderRamachandran(pdbIds, chains);
+        }).fail(function () {
+          renderRamachandran(pdbIds, chains);
+        })
+      });
+    }());
+  </script>
+</head>
+
+<div id='rm'></div>
+<!-- This is how it is supposed to be integrated in the webpage
+<body>
+  <ramachandran-component pdb-id="1tqn" chains-to-show='["A"]' models-to-show='["1"]' width="600"></ramachandran-component>
+</body>-->
+
+</html>
