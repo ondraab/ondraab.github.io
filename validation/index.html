@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Ramachandran component</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="../custom-elements.min.js"></script>
+  <script src="../ramachandran-component.js"></script>
+
+  <link rel="stylesheet" href="litemol/pdb.litemol.min.css" />
+  <script src="litemol/pdb.litemol.min.js"></script>
+
+  <script>
+
+      let renderRamachandran = function (id, chains, firstPdb) {
+          let comp = document.createElement('ramachandran-component');
+          comp.setAttribute('pdb-ids', id);
+          comp.setAttribute('chains-to-show', chains);
+          comp.setAttribute('width', 600);
+          comp.setAttribute('models-to-show', '["1"]');
+          document.getElementById('rm').appendChild(comp);
+
+          let litemol = angular.element(`<pdb-lite-mol pdb-id="'${firstPdb}'"></pdb-lite-mol>`);
+          $('#litemol').append(litemol);
+          console.log(litemol);
+          // document.getElementById('litemol').innerHTML = `<pdb-lite-mol pdb-id="'1tqn'"></pdb-lite-mol>`;
+          // document.getElementById('litemol').appendChild(litemol);
+          // document.getElementsByName('pdb-lite-mol').item(0).setAttribute(`'${firstPdb}'`)
+          // let plugin = LiteMol.Plugin.create({ target: '#litemol' });
+          // plugin.loadMolecule({
+          //     id: firstPdb,
+          //     url: `https://www.ebi.ac.uk/pdbe/static/entry/${firstPdb}_updated.cif`,
+          // });
+      };
+
+      (function () {
+          'use strict';
+          $(document).ready(function ($http) {
+              let tokens = window.location.href.split('/').reverse();
+              let pdbs = tokens[0].split(':');
+              pdbs[0] = pdbs[0].substring(1);
+              let pdbid = tokens[0] === "" ? '1tqn' : tokens[0].substring(1);
+
+              pdbid = pdbs[0];
+              let chains = '["A"]';
+              let pdbIds = '["' + pdbs.join('","') + '"]';
+
+              $.getJSON("https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/" + pdbid, function (data) {
+                  let c = [];
+                  data[pdbid].forEach(e => {
+                      e['in_chains'].forEach(x => {
+                          c.push(x)
+                      })
+                  });
+                  let sorted = Array.from(new Set(c)).sort();
+                  let chains = '["' + sorted.join('","') + '"]';
+
+                  renderRamachandran(pdbIds, chains, pdbid);
+              }).fail(function () {
+                  renderRamachandran(pdbIds, chains,pdbid);
+              })
+          });
+      }());
+  </script>
+</head>
+
+<div id='rm' style="display: inline-block;"></div>
+<div id='litemol' style="float:left;position:relative;height:400px;width:750px;display: inline-block; margin: 75px 10px 0 20px">
+  <pdb-lite-mol pdb-id="'1tqn'"></pdb-lite-mol>
+</div>
+<!-- This is how it is supposed to be integrated in the webpage
+<body>
+  <ramachandran-component pdb-id="1tqn" chains-to-show='["A"]' models-to-show='["1"]' width="600"></ramachandran-component>
+</body>-->
+
+</html>
