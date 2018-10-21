@@ -5,15 +5,43 @@
   <meta charset="utf-8">
   <title>Ramachandran component</title>
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script src="../custom-elements.min.js"></script>
-  <script src="../ramachandran-component.js"></script>
+  <script src="custom-elements.min.js"></script>
+  <script src="ramachandran-component.js"></script>
 
-  <link rel="stylesheet" href="litemol/pdb.litemol.min.css" />
+  <script src="protvista.js"></script>
+  <link href="main.css" rel="stylesheet" />
+
+  <!-- minified component css -->
+  <link rel="stylesheet" type="text/css" href="litemol/pdb.litemol.min.css">
+
+  <!-- Dependencey scripts (these can be skipped if already included in page) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+
+  <!-- minified component js -->
   <script src="litemol/pdb.litemol.min.js"></script>
 
-  <script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+          integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+          crossorigin="anonymous"></script>
+  <!--<script>-->
+      <!--(function () {-->
+          <!--'use strict';-->
+          <!--angular.element(document).ready(function () {-->
+              <!--angular.bootstrap(document, ['pdb.litemol']);-->
+          <!--});-->
+      <!--}());-->
+  <!--</script>-->
 
-      let renderRamachandran = function (id, chains, firstPdb) {
+    <script>
+        (function () {
+            'use strict';
+            angular.element(document).ready(function () {
+                angular.bootstrap(document, ['pdb.litemol']);
+            });
+        }());
+
+
+        let renderRamachandran = function (id, chains, firstPdb, uniprot) {
           let comp = document.createElement('ramachandran-component');
           comp.setAttribute('pdb-ids', id);
           comp.setAttribute('chains-to-show', chains);
@@ -21,17 +49,9 @@
           comp.setAttribute('models-to-show', '["1"]');
           document.getElementById('rm').appendChild(comp);
 
-          let litemol = angular.element(`<pdb-lite-mol pdb-id="'${firstPdb}'"></pdb-lite-mol>`);
-          $('#litemol').append(litemol);
-          console.log(litemol);
-          // document.getElementById('litemol').innerHTML = `<pdb-lite-mol pdb-id="'1tqn'"></pdb-lite-mol>`;
-          // document.getElementById('litemol').appendChild(litemol);
-          // document.getElementsByName('pdb-lite-mol').item(0).setAttribute(`'${firstPdb}'`)
-          // let plugin = LiteMol.Plugin.create({ target: '#litemol' });
-          // plugin.loadMolecule({
-          //     id: firstPdb,
-          //     url: `https://www.ebi.ac.uk/pdbe/static/entry/${firstPdb}_updated.cif`,
-          // });
+            let protvistaDiv = document.getElementById("protvistadiv");
+            let ProtVista = require('ProtVista');
+            new ProtVista({ el: protvistaDiv, uniprotacc: uniprot });
       };
 
       (function () {
@@ -46,6 +66,14 @@
               let chains = '["A"]';
               let pdbIds = '["' + pdbs.join('","') + '"]';
 
+              let uniprotId;
+              $.getJSON(`https://www.ebi.ac.uk/pdbe/api/mappings/${pdbid}`, function (data) {
+
+                  uniprotId = Object.keys(data[pdbid].UniProt)[0];
+              }).fail(function () {
+                  uniprotId = 'P08684';
+              });
+
               $.getJSON("https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/" + pdbid, function (data) {
                   let c = [];
                   data[pdbid].forEach(e => {
@@ -56,19 +84,28 @@
                   let sorted = Array.from(new Set(c)).sort();
                   let chains = '["' + sorted.join('","') + '"]';
 
-                  renderRamachandran(pdbIds, chains, pdbid);
+                  window.setTimeout(() => {
+                      renderRamachandran(pdbIds, chains, pdbid, uniprotId);
+                  }, 100)
               }).fail(function () {
-                  renderRamachandran(pdbIds, chains,pdbid);
+                  window.setTimeout(() => {
+                      renderRamachandran(pdbIds, chains, pdbid, uniprotId);
+                  }, 100)
               })
           });
       }());
+
+      window.addEventListener('PDB.litemol.mouseover', (event) => {
+          console.log(event.eventData);
+      })
   </script>
 </head>
 
 <div id='rm' style="display: inline-block;"></div>
-<div id='litemol' style="float:left;position:relative;height:400px;width:750px;display: inline-block; margin: 75px 10px 0 20px">
+<div id='litemol' style="float:left;position:relative;height:400px;width:750px;display: inline-block; margin: 10px 10px 0 20px">
   <pdb-lite-mol pdb-id="'1tqn'"></pdb-lite-mol>
 </div>
+<div id="protvistadiv" style="padding: 5px"></div>
 <!-- This is how it is supposed to be integrated in the webpage
 <body>
   <ramachandran-component pdb-id="1tqn" chains-to-show='["A"]' models-to-show='["1"]' width="600"></ramachandran-component>
