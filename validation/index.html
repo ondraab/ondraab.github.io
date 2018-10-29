@@ -33,6 +33,7 @@
   <!--</script>-->
 
     <script>
+      let pdbId;
         (function () {
             'use strict';
             angular.element(document).ready(function () {
@@ -54,7 +55,11 @@
 
             let litemol = document.createElement('pdb-lite-mol');
             litemol.setAttribute('pdb-id', `'${firstPdb}'`);
+            // method 1
             document.getElementById('litemol').appendChild(litemol);
+
+            //method 2
+            // document.getElementById('litemol').innerHTML = `<pdb-lite-mol pdb-id="'${firstPdb}'"></pdb-lite-mol>`
       };
 
       (function () {
@@ -63,23 +68,23 @@
               let tokens = window.location.href.split('/').reverse();
               let pdbs = tokens[0].split(':');
               pdbs[0] = pdbs[0].substring(1);
-              let pdbid = tokens[0] === "" ? '1tqn' : tokens[0].substring(1);
+              pdbId = tokens[0] === "" ? '1tqn' : tokens[0].substring(1);
 
-              pdbid = pdbs[0];
+              pdbId = pdbs[0];
               let chains = '["A"]';
               let pdbIds = '["' + pdbs.join('","') + '"]';
 
               let uniprotId;
-              $.getJSON(`https://www.ebi.ac.uk/pdbe/api/mappings/${pdbid}`, function (data) {
+              $.getJSON(`https://www.ebi.ac.uk/pdbe/api/mappings/${pdbId}`, function (data) {
 
-                  uniprotId = Object.keys(data[pdbid].UniProt)[0];
+                  uniprotId = Object.keys(data[pdbId].UniProt)[0];
               }).fail(function () {
                   uniprotId = 'P08684';
               });
 
-              $.getJSON("https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/" + pdbid, function (data) {
+              $.getJSON("https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/" + pdbId, function (data) {
                   let c = [];
-                  data[pdbid].forEach(e => {
+                  data[pdbId].forEach(e => {
                       e['in_chains'].forEach(x => {
                           c.push(x)
                       })
@@ -88,11 +93,11 @@
                   let chains = '["' + sorted.join('","') + '"]';
 
                   window.setTimeout(() => {
-                      renderRamachandran(pdbIds, chains, pdbid, uniprotId);
+                      renderRamachandran(pdbIds, chains, pdbId, uniprotId);
                   }, 100)
               }).fail(function () {
                   window.setTimeout(() => {
-                      renderRamachandran(pdbIds, chains, pdbid, uniprotId);
+                      renderRamachandran(pdbIds, chains, pdbId, uniprotId);
                   }, 100)
               })
           });
@@ -102,7 +107,9 @@
 
 <div id='rm' style="display: inline-block;"></div>
 <div id='litemol' style="top:-275px;position:relative;height:400px;width:750px;display: inline-block; margin: 10px 10px 0 20px">
-  <pdb-lite-mol pdb-id="'1tqn'"></pdb-lite-mol>
+  <!--method 3-->
+  <!--<pdb-lite-mol onload="this.pdbId = pdbId"></pdb-lite-mol>-->
+  <pdb-lite-mol pdb-id=[this.pdbId]></pdb-lite-mol>
 </div>
 <div id="protvistadiv" style="padding: 5px"></div>
 <!-- This is how it is supposed to be integrated in the webpage
