@@ -40,7 +40,6 @@
             });
         }());
 
-
         let renderRamachandran = function (id, chains, firstPdb, uniprot) {
           let comp = document.createElement('ramachandran-component');
           comp.setAttribute('pdb-ids', id);
@@ -52,6 +51,10 @@
             let protvistaDiv = document.getElementById("protvistadiv");
             let ProtVista = require('ProtVista');
             new ProtVista({ el: protvistaDiv, uniprotacc: uniprot });
+
+            let litemol = document.createElement('pdb-lite-mol');
+            litemol.setAttribute('pdb-id', `'${firstPdb}'`);
+            document.getElementById('litemol').appendChild(litemol);
       };
 
       (function () {
