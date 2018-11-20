@@ -35,9 +35,9 @@
 </head>
 <body>
 <div id='rm' style="display: inline-block;"></div>
-<div id='litemol' style="top:-275px;position:relative;height:400px;width:750px;display: inline-block; margin: 10px 10px 0 20px"
+<!-- <div id='litemol' style="top:-275px;position:relative;height:400px;width:750px;display: inline-block; margin: 10px 10px 0 20px"
         ng-app="myApp">
-    <my-litemol></my-litemol>
+    <my-litemol></my-litemol> -->
   <!--<pdb-lite-mol pdb-id="'{{data}}'"></pdb-lite-mol>-->
 
 </div>
@@ -45,20 +45,20 @@
 <script type="text/javascript">
     let pdbId = window.location.href.split('/').reverse()[0].substring(1);
 
-    (function () {
-        'use strict';
+//     (function () {
+//         'use strict';
 
-        var app = angular.module('myApp', []);
+//         var app = angular.module('myApp', []);
 
-        angular.element(document).ready(function () {
-            angular.bootstrap(document, ['pdb.litemol']);
-        });
-        app.directive('myLitemol', function () {
-            return {
-                template: `<pdb-lite-mol pdb-id="'${pdbId}'"></pdb-lite-mol>`
-            }
-        })
-    }());
+//         angular.element(document).ready(function () {
+//             angular.bootstrap(document, ['pdb.litemol']);
+//         });
+//         app.directive('myLitemol', function () {
+//             return {
+//                 template: `<pdb-lite-mol pdb-id="'${pdbId}'"></pdb-lite-mol>`
+//             }
+//         })
+//     }());
 
     let renderRamachandran = function (id, chains, firstPdb, uniprot) {
         let comp = document.createElement('ramachandran-component');
